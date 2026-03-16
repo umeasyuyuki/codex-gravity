@@ -1,12 +1,13 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-import { auth } from "@/auth"
 import { db, schema } from "@/db"
-import { isAdminUser } from "@/lib/userAccess"
 import { getAccessToken } from "@/lib/google-auth"
+import { getRuntimeEnv } from "@/lib/runtime-env"
 import { eq } from "drizzle-orm"
 
 export const runtime = "nodejs"
+
+const API_KEY_HEADER = "x-rpo-api-key"
 
 const TARGET_HEADERS = [
     "応募日",        // A
@@ -49,10 +50,11 @@ type SheetResult = {
     rowCount?: number
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
     try {
-        const session = await auth()
-        if (!isAdminUser(session?.user?.email)) {
+        const configuredApiKey = getRuntimeEnv("RPO_API_KEY") || getRuntimeEnv("INBOUND_API_KEY")
+        const providedApiKey = request.headers.get(API_KEY_HEADER)?.trim()
+        if (!configuredApiKey || !providedApiKey || providedApiKey !== configuredApiKey) {
             return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
         }
 
