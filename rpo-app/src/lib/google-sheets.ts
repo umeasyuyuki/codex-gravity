@@ -52,9 +52,9 @@ export async function copyTemplateSpreadsheet(companyName: string): Promise<Copy
         sheets: Array<{ properties: { sheetId: number; title: string } }>
     }
 
-    const targetSheet = sheetsData.sheets.find(s => s.properties.sheetId === 2)?.properties
+    const targetSheet = sheetsData.sheets.find(s => s.properties.sheetId === 465742923)?.properties
         ?? sheetsData.sheets[0]?.properties
-    const gid = targetSheet?.sheetId ?? 2
+    const gid = targetSheet?.sheetId ?? 465742923
     const sheetName = targetSheet?.title ?? null
 
     return {

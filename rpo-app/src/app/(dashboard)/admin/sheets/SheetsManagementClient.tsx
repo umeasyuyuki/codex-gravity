@@ -25,7 +25,7 @@ export default function SheetsManagementClient({ sheets: initialSheets, companie
     // Add form state
     const [newCompanyName, setNewCompanyName] = useState("")
     const [newSpreadsheetId, setNewSpreadsheetId] = useState("")
-    const [newGid, setNewGid] = useState("2")
+    const [newGid, setNewGid] = useState("465742923")
     const [newSheetName, setNewSheetName] = useState("")
 
     const resetForm = () => {
