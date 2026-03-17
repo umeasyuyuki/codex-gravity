@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { updateApplicant, addCallLog, deleteCallLog, deleteApplicant } from "@/lib/actions/applicant"
+import { updateApplicant, addCallLog, deleteCallLog, deleteApplicant, updateCallLogCalledAt } from "@/lib/actions/applicant"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
@@ -220,6 +220,77 @@ function calcAgeString(dateValue: string | number | Date | null | undefined) {
     }
     if (!Number.isFinite(age) || age < 0) return "未設定"
     return `${age}歳`
+}
+
+function toDatetimeLocalValue(dt: string | number | Date | null) {
+    if (!dt) return ""
+    const d = new Date(dt)
+    if (Number.isNaN(d.getTime())) return ""
+    const pad = (n: number) => String(n).padStart(2, "0")
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function EditableCallLogDate({ callLogId, calledAt }: { callLogId: string, calledAt: string | number | Date | null }) {
+    const [editing, setEditing] = useState(false)
+    const [isPendingUpdate, startUpdateTransition] = useTransition()
+
+    if (!editing) {
+        return (
+            <span
+                className="tabular-nums cursor-pointer hover:text-primary transition-colors"
+                onClick={() => setEditing(true)}
+                title="クリックして日時を編集"
+            >
+                {new Date(calledAt || 0).toLocaleString("ja-JP")}
+            </span>
+        )
+    }
+
+    return (
+        <span className="inline-flex items-center gap-1">
+            <input
+                type="datetime-local"
+                defaultValue={toDatetimeLocalValue(calledAt)}
+                autoFocus
+                onBlur={(e) => {
+                    if (!e.relatedTarget?.closest("span")) {
+                        setEditing(false)
+                    }
+                }}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault()
+                        const val = e.currentTarget.value
+                        if (!val) return
+                        startUpdateTransition(async () => {
+                            await updateCallLogCalledAt(callLogId, val)
+                            setEditing(false)
+                        })
+                    } else if (e.key === "Escape") {
+                        setEditing(false)
+                    }
+                }}
+                className="h-6 px-1 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring/40"
+            />
+            <button
+                type="button"
+                disabled={isPendingUpdate}
+                onClick={(e) => {
+                    const input = e.currentTarget.previousElementSibling as HTMLInputElement
+                    const val = input?.value
+                    if (!val) return
+                    startUpdateTransition(async () => {
+                        await updateCallLogCalledAt(callLogId, val)
+                        setEditing(false)
+                    })
+                }}
+                className="h-6 px-1.5 rounded bg-primary text-primary-foreground text-[10px] font-medium hover:bg-primary/90 disabled:opacity-50"
+            >
+                {isPendingUpdate ? "..." : "保存"}
+            </button>
+            <button type="button" onClick={() => setEditing(false)} className="text-[10px] text-muted-foreground hover:text-foreground">✕</button>
+        </span>
+    )
 }
 
 export default function ApplicantDetailClient({ initialData, sheetUrl }: ApplicantDetailClientProps & { sheetUrl?: string }) {
@@ -742,7 +813,7 @@ export default function ApplicantDetailClient({ initialData, sheetUrl }: Applica
                                 initialData.callLogs.map((log) => (
                                     <div key={log.id} className="text-sm border-l-2 border-primary/25 pl-3 py-2 bg-muted/15 rounded-r-lg px-4 relative group transition-colors duration-150 hover:bg-muted/30">
                                         <div className="flex justify-between items-center gap-2 text-muted-foreground text-xs mb-1">
-                                            <span className="tabular-nums">{new Date(log.calledAt || 0).toLocaleString("ja-JP")}</span>
+                                            <EditableCallLogDate callLogId={log.id} calledAt={log.calledAt} />
                                             <span>担当: {log.callerName}</span>
                                             <button
                                                 type="button"
