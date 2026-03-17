@@ -191,6 +191,37 @@ export async function addCallLog(data: AddCallLogInput) {
     return { success: true };
 }
 
+export async function updateCallLogCalledAt(callLogId: string, calledAt: string) {
+    const targetId = callLogId?.trim();
+    if (!targetId) {
+        throw new Error("架電ログIDが不正です。");
+    }
+
+    const newDate = new Date(calledAt);
+    if (Number.isNaN(newDate.getTime())) {
+        throw new Error("架電日時が不正です。");
+    }
+
+    const target = await db
+        .select({ applicantId: schema.callLogs.applicantId })
+        .from(schema.callLogs)
+        .where(eq(schema.callLogs.id, targetId))
+        .get();
+
+    if (!target) {
+        throw new Error("対象の架電ログが見つかりません。");
+    }
+
+    await db
+        .update(schema.callLogs)
+        .set({ calledAt: newDate })
+        .where(eq(schema.callLogs.id, targetId));
+
+    revalidatePath(`/applicants/${target.applicantId}`);
+    revalidatePath("/calls");
+    return { success: true };
+}
+
 export async function deleteCallLog(callLogId: string) {
     const targetId = callLogId?.trim();
     if (!targetId) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { FormEvent, useEffect, useRef, useState } from "react"
+import { FormEvent, useEffect, useRef, useState, useTransition } from "react"
 import { Clock, PhoneCall, Flame, Gauge, MapPin, ExternalLink } from "lucide-react"
 import { searchApplicantsForCallLog, type CallLogApplicantOption } from "@/lib/actions/applicant"
 import { type CallHeatmapAnalytics } from "@/lib/actions/calls"
@@ -50,6 +50,7 @@ type CallLogsClientProps = {
     sheetMap?: Record<string, SheetEntry>
     createCallLogAction: (formData: FormData) => Promise<void>
     deleteCallLogAction: (formData: FormData) => Promise<void>
+    updateCalledAtAction: (formData: FormData) => Promise<void>
 }
 
 function formatRate(rate: number) {
@@ -223,12 +224,84 @@ function renderRegisterForm(props: {
     )
 }
 
+function toDatetimeLocalValue(value: string | number | Date | null) {
+    if (!value) return ""
+    const d = new Date(value)
+    if (Number.isNaN(d.getTime())) return ""
+    const pad = (n: number) => String(n).padStart(2, "0")
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function EditableCalledAt({ log, updateCalledAtAction }: { log: CallLog, updateCalledAtAction: (formData: FormData) => Promise<void> }) {
+    const [editing, setEditing] = useState(false)
+    const [isPending, startTransition] = useTransition()
+
+    if (!editing) {
+        return (
+            <div
+                className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+                onClick={() => setEditing(true)}
+                title="クリックして日時を編集"
+            >
+                <Clock className="w-3.5 h-3.5 text-muted-foreground/70" />
+                {new Date(log.calledAt || 0).toLocaleString("ja-JP", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                })}
+            </div>
+        )
+    }
+
+    return (
+        <form
+            action={(formData) => {
+                startTransition(async () => {
+                    await updateCalledAtAction(formData)
+                    setEditing(false)
+                })
+            }}
+            className="flex items-center gap-1"
+        >
+            <input type="hidden" name="callLogId" value={log.id} />
+            <input
+                type="datetime-local"
+                name="calledAt"
+                defaultValue={toDatetimeLocalValue(log.calledAt)}
+                autoFocus
+                onBlur={(e) => {
+                    if (!e.relatedTarget?.closest("form")) {
+                        setEditing(false)
+                    }
+                }}
+                className="h-7 px-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring/40"
+            />
+            <button
+                type="submit"
+                disabled={isPending}
+                className="h-7 px-2 rounded bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50"
+            >
+                {isPending ? "..." : "保存"}
+            </button>
+            <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="h-7 px-1.5 rounded text-xs text-muted-foreground hover:text-foreground"
+            >
+                ✕
+            </button>
+        </form>
+    )
+}
+
 function renderHistoryTable(props: {
     logs: CallLog[]
     deleteCallLogAction: (formData: FormData) => Promise<void>
+    updateCalledAtAction: (formData: FormData) => Promise<void>
     sheetMap: Record<string, SheetEntry>
 }) {
-    const { logs, deleteCallLogAction, sheetMap } = props
+    const { logs, deleteCallLogAction, updateCalledAtAction, sheetMap } = props
 
     return (
         <div className="w-full overflow-auto">
@@ -262,15 +335,7 @@ function renderHistoryTable(props: {
                         logs.map((log) => (
                                 <tr key={log.id} className="even:bg-muted/10 hover:bg-muted/25 transition-colors duration-100 group">
                                     <td className="px-6 py-4 text-muted-foreground whitespace-nowrap tabular-nums">
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-3.5 h-3.5 text-muted-foreground/70" />
-                                        {new Date(log.calledAt || 0).toLocaleString("ja-JP", {
-                                            month: "short",
-                                            day: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })}
-                                    </div>
+                                    <EditableCalledAt log={log} updateCalledAtAction={updateCalledAtAction} />
                                 </td>
                                 <td className="px-6 py-4 font-medium text-foreground">
                                     <Link href={`/applicants/${log.applicantId}`} className="hover:underline text-primary transition-colors">
@@ -499,6 +564,7 @@ export default function CallLogsClient({
     sheetMap = {},
     createCallLogAction,
     deleteCallLogAction,
+    updateCalledAtAction,
 }: CallLogsClientProps) {
     const [applicantQuery, setApplicantQuery] = useState("")
     const [applicantOptions, setApplicantOptions] = useState<CallLogApplicantOption[]>([])
@@ -598,7 +664,7 @@ export default function CallLogsClient({
                         selectedCallerId={selectedCallerId}
                     />
 
-                    {isAnalysisMode ? renderAnalysisPanel(analytics) : renderHistoryTable({ logs, deleteCallLogAction, sheetMap })}
+                    {isAnalysisMode ? renderAnalysisPanel(analytics) : renderHistoryTable({ logs, deleteCallLogAction, updateCalledAtAction, sheetMap })}
                 </>
             )}
         </div>

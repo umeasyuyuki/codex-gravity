@@ -4,7 +4,7 @@ import { getCompanies } from "@/lib/actions"
 import { getCompanySheetMap } from "@/lib/actions/sheets"
 import CallLogsClient from "../CallLogsClient"
 import CompanyContextBar from "@/components/CompanyContextBar"
-import { createCallLogAction, deleteCallLogAction } from "../actions"
+import { createCallLogAction, deleteCallLogAction, updateCallLogCalledAtAction } from "../actions"
 
 export default async function CallLogsAnalysisPage({ searchParams }: { searchParams: Promise<{ companyId?: string, callerId?: string }> }) {
     const params = await searchParams
@@ -54,6 +54,7 @@ export default async function CallLogsAnalysisPage({ searchParams }: { searchPar
                 sheetMap={sheetMap}
                 createCallLogAction={createCallLogAction}
                 deleteCallLogAction={deleteCallLogAction}
+                updateCalledAtAction={updateCallLogCalledAtAction}
             />
         </div>
     )
