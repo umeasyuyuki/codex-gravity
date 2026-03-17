@@ -11,6 +11,7 @@
 
 - `manifest.md`
 - `decision-log.md`
+- `engineering-rules.md`
 - `docs/reports/{task_id}.md`（学習レポート）
 
 ## 推奨ファイル
@@ -29,6 +30,7 @@
 6. 却下案と理由を `decision-log.md` に残す。
 7. `docs/reports/{task_id}.md` に同一ファイル追記で進捗を残す。
 8. コンテキストが古い場合は `ask_codex.sh` 実行前に再生成する。
+9. `bash .agent/skills/codex-system/scripts/validate_report.sh docs/reports/{task_id}.md` が成功することを確認する。
 
 ## Persona 設定
 

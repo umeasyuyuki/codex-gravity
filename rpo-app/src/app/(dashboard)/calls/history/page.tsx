@@ -3,6 +3,7 @@ import { getCallLogs, getUsers } from "@/lib/actions/calls"
 import { getCompanies } from "@/lib/actions"
 import { getCompanySheetMap } from "@/lib/actions/sheets"
 import CallLogsClient from "../CallLogsClient"
+import CompanyContextBar from "@/components/CompanyContextBar"
 import { createCallLogAction, deleteCallLogAction } from "../actions"
 
 export default async function CallLogsHistoryPage({ searchParams }: { searchParams: Promise<{ companyId?: string, callerId?: string }> }) {
@@ -16,6 +17,10 @@ export default async function CallLogsHistoryPage({ searchParams }: { searchPara
         getCompanySheetMap(),
     ])
 
+    const filterCompanyName = filterCompanyId
+        ? companies.find((c) => c.id === filterCompanyId)?.name ?? null
+        : null
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -27,6 +32,15 @@ export default async function CallLogsHistoryPage({ searchParams }: { searchPara
                     <p className="text-muted-foreground mt-0.5 text-[13px]">架電履歴の一覧を確認できます</p>
                 </div>
             </div>
+
+            {filterCompanyId && filterCompanyName && (
+                <CompanyContextBar
+                    companyId={filterCompanyId}
+                    companyName={filterCompanyName}
+                    sheetEntry={sheetMap[filterCompanyId]}
+                    activePage="calls"
+                />
+            )}
 
             <CallLogsClient
                 logs={logs}

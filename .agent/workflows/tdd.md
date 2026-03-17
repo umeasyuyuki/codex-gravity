@@ -33,6 +33,15 @@ description: Red-Green-Refactor サイクルを回しつつ Gate 1/Gate 2 でテ
 - 失敗テストから得た知見
 - 実装で意識した観点
 - 境界値の扱い
+- 技術スタック選定理由（非エンジニア向け）
+- 駆け出しエンジニア向け必須チェック
+- 参考URL（Qiita / Zenn / 公式）
+
+追記後に以下を実行：
+
+```bash
+bash .agent/skills/codex-system/scripts/validate_report.sh docs/reports/{task_id}.md
+```
 
 ## Step 6: 実装後監査（Codex Gate 2）
 

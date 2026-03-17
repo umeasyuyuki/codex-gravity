@@ -7,6 +7,11 @@ description: Use this skill to promote approved architectural decisions from doc
 
 `docs/DESIGN.md` を更新し、確定した設計決定を記録する。
 
+## 必須前提
+
+- `docs/for-codex/engineering-rules.md` に沿って、サービス境界と依存契約を明記する
+- コード変更済みタスクは `docs/reports/{task_id}.md` の追記完了を確認する
+
 ## いつ使うか
 
 - Gate 1 / Gate 2 の結果を最終採用したとき
@@ -19,6 +24,7 @@ description: Use this skill to promote approved architectural decisions from doc
 2. `docs/DESIGN.md` の履歴に追記
 3. 背景・理由・代替案・影響を明記
 4. 関連ログへの参照を追加
+5. サービス境界、契約、データ所有者を明記して密結合を避ける
 
 ## 注意事項
 

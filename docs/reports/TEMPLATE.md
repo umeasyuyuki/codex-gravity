@@ -3,6 +3,8 @@
 - owner: Antigravity
 - started_at: {YYYY-MM-DD HH:MM}
 - report_path: docs/reports/{task_id}.md
+- format: markdown
+- update_rule: append-only to the same file
 
 ## Goal
 
@@ -21,13 +23,17 @@
 
 - {実施内容}
 
-#### Why this decision
+#### Why this tech stack (for non-engineers)
 
-- {判断理由}
+- {技術選定理由を非エンジニア向けに説明}
 
-#### Beginner note
+#### Must-check points for junior engineers
 
-- {初心者向けの短い解説}
+- {必ず確認する観点}
+
+#### References (Qiita/Zenn/Official)
+
+- [{記事タイトル}](https://example.com)
 
 #### Next step
 

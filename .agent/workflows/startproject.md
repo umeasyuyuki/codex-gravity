@@ -43,6 +43,7 @@ Antigravity が実装を主導し、Codex は Gate 1 / Gate 2 で判断と監査
 
 - 目的、スコープ、制約、成功基準を整理
 - 実装計画のドラフトを作成
+- サービス境界（責務、契約、データ所有者）を定義
 - `docs/for-codex/plan-context.md` に要件Q&Aサマリーを記録
 - `docs/reports/{task_id}.md` に判断理由を追記
 
@@ -68,6 +69,11 @@ Antigravity が実装を主導し、Codex は Gate 1 / Gate 2 で判断と監査
 - Gate 1 で修正した計画を実装
 - テストを実行し、結果を記録
 - 実装内容を `docs/reports/{task_id}.md` に追記
+- 追記後に以下を実行してレポート必須項目を検証
+
+```bash
+bash .agent/skills/codex-system/scripts/validate_report.sh docs/reports/{task_id}.md
+```
 
 ## Phase 6: 実装コンテキスト更新（Antigravity）
 

@@ -59,7 +59,7 @@ logs/
 
 ## Step 5: macOS 実行環境の確認
 
-`scripts/ask_codex.sh` と `scripts/review.sh` が存在し、実行権限を持つか確認。
+`scripts/ask_codex.sh`、`scripts/review.sh`、`scripts/validate_report.sh` が存在し、実行権限を持つか確認。
 
 ```bash
 which node

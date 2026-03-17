@@ -1,29 +1,29 @@
 "use client"
 
 import { FormEvent, useEffect, useRef, useState } from "react"
-import { Clock, ExternalLink, PhoneCall, Flame, Gauge, MapPin } from "lucide-react"
+import { Clock, PhoneCall, Flame, Gauge, MapPin, ExternalLink } from "lucide-react"
 import { searchApplicantsForCallLog, type CallLogApplicantOption } from "@/lib/actions/applicant"
 import { type CallHeatmapAnalytics } from "@/lib/actions/calls"
 import Link from "next/link"
 import CallLogsFilterBar from "./CallLogsFilterBar"
+
+type SheetEntry = {
+    spreadsheetId: string
+    gid: number
+    sheetName: string | null
+}
 
 type CallLog = {
     id: string
     calledAt: string | number | Date | null
     applicantId: string
     applicantName: string
-    companyName: string
     companyId: string | null
+    companyName: string
     callerName: string
     callCount: number
     isConnected: boolean | null
     note: string | null
-}
-
-type SheetEntry = {
-    spreadsheetId: string
-    gid: number
-    sheetName: string | null
 }
 
 type Company = {
@@ -225,10 +225,10 @@ function renderRegisterForm(props: {
 
 function renderHistoryTable(props: {
     logs: CallLog[]
-    sheetMap: Record<string, SheetEntry>
     deleteCallLogAction: (formData: FormData) => Promise<void>
+    sheetMap: Record<string, SheetEntry>
 }) {
-    const { logs, sheetMap, deleteCallLogAction } = props
+    const { logs, deleteCallLogAction, sheetMap } = props
 
     return (
         <div className="w-full overflow-auto">
@@ -277,8 +277,8 @@ function renderHistoryTable(props: {
                                         {log.applicantName}
                                     </Link>
                                 </td>
-                                <td className="px-6 py-4 text-muted-foreground max-w-[150px]">
-                                    <span className="inline-flex items-center gap-1 truncate">
+                                <td className="px-6 py-4 text-muted-foreground truncate max-w-[150px]">
+                                    <span className="inline-flex items-center gap-1">
                                         {log.companyName}
                                         {log.companyId && sheetMap[log.companyId] && (
                                             <a
@@ -286,6 +286,7 @@ function renderHistoryTable(props: {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 title={`${log.companyName} のスプレッドシートを開く`}
+                                                onClick={(e) => e.stopPropagation()}
                                                 className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors duration-150"
                                             >
                                                 <ExternalLink className="w-3.5 h-3.5" />
@@ -597,7 +598,7 @@ export default function CallLogsClient({
                         selectedCallerId={selectedCallerId}
                     />
 
-                    {isAnalysisMode ? renderAnalysisPanel(analytics) : renderHistoryTable({ logs, sheetMap, deleteCallLogAction })}
+                    {isAnalysisMode ? renderAnalysisPanel(analytics) : renderHistoryTable({ logs, deleteCallLogAction, sheetMap })}
                 </>
             )}
         </div>

@@ -7,6 +7,18 @@ description: Use this skill when Antigravity needs Codex for deep reasoning task
 
 設計判断・デバッグ・レビューを Codex CLI に委譲する。
 
+## 必須前提
+
+Gate 実行前に以下を必ず満たす。
+
+1. `docs/for-codex/engineering-rules.md` を読み、疎結合設計ルールを満たしていること
+2. コード変更がある場合、`docs/reports/{task_id}.md` に追記済みであること
+3. 以下の検証が通ること
+
+```bash
+bash .agent/skills/codex-system/scripts/validate_report.sh docs/reports/{task_id}.md
+```
+
 ## 実行モード
 
 - `CODEX_MODE=plan-review`
@@ -43,10 +55,11 @@ bash .agent/skills/codex-system/scripts/review.sh --high-risk
 
 ## コンテキスト方針
 
-1. `docs/for-codex/` を最優先で読む
-2. 矛盾・不足・高リスク時のみコード全体を掘る
-3. `manifest.md` の `requirements_questions_asked >= 3` と `requirements_confirmed = yes` を満たしてから Gate 実行する（曖昧点が残る場合は 4 問以上推奨）
-4. 重要判断は `docs/for-codex/decision-log.md` と `docs/DESIGN.md` に反映する
+1. `docs/for-codex/engineering-rules.md` を先に読む
+2. `docs/for-codex/` を最優先で読む
+3. 矛盾・不足・高リスク時のみコード全体を掘る
+4. `manifest.md` の `requirements_questions_asked >= 3` と `requirements_confirmed = yes` を満たしてから Gate 実行する（曖昧点が残る場合は 4 問以上推奨）
+5. 重要判断は `docs/for-codex/decision-log.md` と `docs/DESIGN.md` に反映する
 
 ## 結果の活用
 

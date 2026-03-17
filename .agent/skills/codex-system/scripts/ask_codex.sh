@@ -113,6 +113,7 @@ esac
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "$SCRIPT_DIR/../../../.." && pwd)"
+VALIDATE_REPORT_SCRIPT="$SCRIPT_DIR/validate_report.sh"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 OUTPUT_DIR="$PROJECT_ROOT/logs/codex-responses"
 OUTPUT_BASENAME="$CODEX_MODE-$TASK_TYPE-$TIMESTAMP"
@@ -256,12 +257,25 @@ if [[ "$CODEX_MODE" != "ad-hoc" ]]; then
   done
 
   REPORT_PATH="$(read_manifest_value report_path)"
-  if [[ -n "$REPORT_PATH" && "$REPORT_PATH" != "TBD" && "$REPORT_PATH" != "docs/reports/{task_id}.md" ]]; then
-    if [[ ! -f "$PROJECT_ROOT/$REPORT_PATH" ]]; then
-      echo "Warning: report_path does not exist yet: $REPORT_PATH" >&2
-      echo "Create or update it via /update-learning-report before final gate execution." >&2
-    fi
+  if [[ -z "$REPORT_PATH" || "$REPORT_PATH" == "TBD" || "$REPORT_PATH" == "docs/reports/{task_id}.md" ]]; then
+    echo "Manifest key 'report_path' must point to an existing report file before $CODEX_MODE." >&2
+    echo "Run /update-learning-report and set docs/reports/<task_id>.md in manifest." >&2
+    exit 1
   fi
+
+  REPORT_FILE="$PROJECT_ROOT/$REPORT_PATH"
+  if [[ ! -f "$REPORT_FILE" ]]; then
+    echo "Report file not found: $REPORT_PATH" >&2
+    echo "Create or update it via /update-learning-report before gate execution." >&2
+    exit 1
+  fi
+
+  if [[ ! -x "$VALIDATE_REPORT_SCRIPT" ]]; then
+    echo "Report validator not found or not executable: $VALIDATE_REPORT_SCRIPT" >&2
+    exit 1
+  fi
+
+  bash "$VALIDATE_REPORT_SCRIPT" "$REPORT_FILE"
 
   MANIFEST_COMMIT="$(read_manifest_value source_commit)"
   if [[ -n "$MANIFEST_COMMIT" && "$MANIFEST_COMMIT" != "$SOURCE_COMMIT" ]]; then
@@ -304,7 +318,8 @@ $CONTEXT
 - Analyze thoroughly before responding.
 - Provide structured output with clear sections.
 - Include trade-offs and alternatives where applicable.
-- Respond in English for reasoning accuracy.
+- Perform internal reasoning in English for accuracy.
+- Write the final user-facing answer in Japanese by default (unless the question explicitly requests another language).
 $MODE_INSTRUCTIONS
 EOF_PROMPT
 )"

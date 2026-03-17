@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { ExternalLink } from "lucide-react"
 import { useEffect, useState, useTransition } from "react"
 import { updateApplicant } from "@/lib/actions/applicant"
+import { ASSIGNEE_OPTIONS, STATUS_OPTIONS } from "@/lib/constants"
+import CompanyNameWithSheetLink from "@/components/CompanyNameWithSheetLink"
 
 type Applicant = {
     id: string
@@ -47,44 +48,6 @@ type Props = {
     applicants: Applicant[]
     sheetMap?: Record<string, SheetEntry>
 }
-
-const ASSIGNEE_OPTIONS = ["佐藤", "迫", "照井"]
-
-const STATUS_OPTIONS = [
-    "",
-    "重複応募（応募歴あり）",
-    "保留（備考必須）",
-    "書類選考中辞退",
-    "書類不採用（MK対応）",
-    "書類不採用（クライアント判断）",
-    "【有効応募】履歴書/職歴書回収中",
-    "【詳細不詳】履歴書/職歴書回収中",
-    "自動送信メール返信待ち（WELLNESS）",
-    "初回電話不通/SMS送付済み",
-    "追電中",
-    "連絡不通（不採用）",
-    "公式LINE誘導中",
-    "電話アポ日程調整中",
-    "電話アポ日程確定済み",
-    "企業面接日程調整中",
-    "面接日程確定済み",
-    "面接日程再調整中",
-    "面接前辞退",
-    "面接飛び",
-    "面接後辞退",
-    "面接不採用",
-    "二次/最終面接調整中",
-    "二次/最終面接日程確定済み",
-    "二次/最終面接前辞退",
-    "二次/最終面接飛び",
-    "二次/最終面接後辞退",
-    "二次/最終面接不採用",
-    "内定",
-    "内定後辞退",
-    "入社前辞退",
-    "入社",
-    "MK提案済み",
-]
 
 function toInputDateValue(value: string | number | Date | null | undefined) {
     if (!value) return ""
@@ -233,20 +196,10 @@ export default function ApplicantsTableClient({ applicants, sheetMap = {} }: Pro
                         </td>
                         {/* B: 会社名 (sticky) */}
                         <td className={`px-3 py-2 whitespace-nowrap text-sm left-[110px] min-w-[140px] ${stickyBase}`}>
-                            <span className="inline-flex items-center gap-1">
-                                {row.companyName}
-                                {sheetMap[row.companyId] && (
-                                    <a
-                                        href={`https://docs.google.com/spreadsheets/d/${sheetMap[row.companyId].spreadsheetId}/edit#gid=${sheetMap[row.companyId].gid}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        title={`${row.companyName} のスプレッドシートを開く`}
-                                        className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors duration-150"
-                                    >
-                                        <ExternalLink className="w-3.5 h-3.5" />
-                                    </a>
-                                )}
-                            </span>
+                            <CompanyNameWithSheetLink
+                                companyName={row.companyName}
+                                sheetEntry={sheetMap[row.companyId]}
+                            />
                         </td>
                         {/* C: 案件名 (sticky) */}
                         <td className={`px-3 py-2 left-[250px] min-w-[140px] ${stickyBase}`}>
@@ -331,8 +284,26 @@ export default function ApplicantsTableClient({ applicants, sheetMap = {} }: Pro
                             />
                         </td>
                         {/* I: 年齢 */}
-                        <td className="px-3 py-2 text-center">
-                            {calcAgeFromDraft(row.birthDate, birthDateInputs[row.id] ?? "")}
+                        <td className="px-3 py-2 min-w-[80px]">
+                            <input
+                                type="number"
+                                min="0"
+                                max="150"
+                                defaultValue={row.age ?? ""}
+                                onBlur={(event) => {
+                                    const val = event.currentTarget.value.trim()
+                                    const nextAge = val ? Number(val) : null
+                                    if (val && (!Number.isFinite(nextAge) || nextAge === null || nextAge < 0)) return
+                                    updateRow(
+                                        row.id,
+                                        { age: nextAge },
+                                        { age: nextAge },
+                                    )
+                                }}
+                                disabled={isRowPending}
+                                placeholder={String(calcAgeFromDraft(row.birthDate, birthDateInputs[row.id] ?? ""))}
+                                className="h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm text-center focus:outline-none focus:ring-1 focus:ring-ring/40 transition-colors duration-150"
+                            />
                         </td>
                         {/* J: 生年月日 */}
                         <td className="px-3 py-2 min-w-[150px]">

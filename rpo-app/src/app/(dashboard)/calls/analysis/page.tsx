@@ -1,19 +1,26 @@
 import { BarChart3 } from "lucide-react"
 import { buildCallConnectionHeatmap, getCallLogs, getUsers } from "@/lib/actions/calls"
 import { getCompanies } from "@/lib/actions"
+import { getCompanySheetMap } from "@/lib/actions/sheets"
 import CallLogsClient from "../CallLogsClient"
+import CompanyContextBar from "@/components/CompanyContextBar"
 import { createCallLogAction, deleteCallLogAction } from "../actions"
 
 export default async function CallLogsAnalysisPage({ searchParams }: { searchParams: Promise<{ companyId?: string, callerId?: string }> }) {
     const params = await searchParams
     const filterCompanyId = params.companyId
     const filterCallerId = params.callerId
-    const [logs, companies, users] = await Promise.all([
+    const [logs, companies, users, sheetMap] = await Promise.all([
         getCallLogs(filterCompanyId, filterCallerId),
         getCompanies(),
         getUsers(),
+        getCompanySheetMap(),
     ])
     const analytics = await buildCallConnectionHeatmap(logs)
+
+    const filterCompanyName = filterCompanyId
+        ? companies.find((c) => c.id === filterCompanyId)?.name ?? null
+        : null
 
     return (
         <div className="space-y-6">
@@ -27,6 +34,15 @@ export default async function CallLogsAnalysisPage({ searchParams }: { searchPar
                 </div>
             </div>
 
+            {filterCompanyId && filterCompanyName && (
+                <CompanyContextBar
+                    companyId={filterCompanyId}
+                    companyName={filterCompanyName}
+                    sheetEntry={sheetMap[filterCompanyId]}
+                    activePage="calls"
+                />
+            )}
+
             <CallLogsClient
                 logs={[]}
                 companies={companies}
@@ -35,6 +51,7 @@ export default async function CallLogsAnalysisPage({ searchParams }: { searchPar
                 selectedCallerId={filterCallerId}
                 analytics={analytics}
                 viewMode="analysis"
+                sheetMap={sheetMap}
                 createCallLogAction={createCallLogAction}
                 deleteCallLogAction={deleteCallLogAction}
             />

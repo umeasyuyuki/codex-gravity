@@ -5,6 +5,7 @@ import { Search } from "lucide-react"
 import CompanyFilterSelect from "./CompanyFilterSelect"
 import ApplicantFilterBar from "./ApplicantFilterBar"
 import ApplicantsTableClient from "./ApplicantsTableClient"
+import CompanyContextBar from "@/components/CompanyContextBar"
 import Link from "next/link"
 
 type SearchParams = {
@@ -58,6 +59,10 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
     const prevPage = safeCurrentPage > 1 ? safeCurrentPage - 1 : null
     const nextPage = safeCurrentPage < totalPages ? safeCurrentPage + 1 : null
 
+    const filterCompanyName = filterCompanyId
+        ? companies.find((c) => c.id === filterCompanyId)?.name ?? null
+        : null
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -66,6 +71,15 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
                     <p className="text-muted-foreground mt-0.5 text-[13px]">選考ステータスや面接日程を管理します</p>
                 </div>
             </div>
+
+            {filterCompanyId && filterCompanyName && (
+                <CompanyContextBar
+                    companyId={filterCompanyId}
+                    companyName={filterCompanyName}
+                    sheetEntry={sheetMap[filterCompanyId]}
+                    activePage="applicants"
+                />
+            )}
 
             <div className="bg-card rounded-xl border border-border overflow-hidden" style={{ boxShadow: "var(--shadow-card)" }}>
                 <div className="px-4 py-3 border-b border-border bg-muted/30 space-y-2">
