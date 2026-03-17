@@ -7,6 +7,11 @@ description: Use this skill to document library constraints, usage patterns, and
 
 ライブラリの制約、使用パターン、注意点を文書化する。
 
+## 必須前提
+
+- `docs/for-codex/engineering-rules.md` を確認し、導入が密結合を増やさないことを確認する
+- ライブラリ導入・更新でコード変更した場合は `docs/reports/{task_id}.md` を必ず追記する
+
 ## いつ使うか
 
 - 新しいライブラリを導入したとき
@@ -52,6 +57,9 @@ description: Use this skill to document library constraints, usage patterns, and
 
 ## プロジェクト固有の設定
 {このプロジェクトでの設定内容}
+
+## サービス境界への影響
+{どのサービスで使用し、どこに依存を持ち込まないか}
 
 ## 参考リンク
 - 公式ドキュメント: {URL}

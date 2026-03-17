@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useMemo } from "react"
+import { ExternalLink } from "lucide-react"
 
 type CompanyYieldRow = {
     companyId: string
@@ -53,10 +54,17 @@ type CompanyGroupWithMembers = {
     memberCompanyIds: string[]
 }
 
+type SheetEntry = {
+    spreadsheetId: string
+    gid: number
+    sheetName: string | null
+}
+
 type Props = {
     yields: CompanyYieldRow[]
     companyId?: string
     groups?: CompanyGroupWithMembers[]
+    sheetMap?: Record<string, SheetEntry>
 }
 
 type DisplayRow =
@@ -145,7 +153,7 @@ const NUMERIC_KEYS: Array<keyof CompanyYieldRow> = [
     "joined",
 ]
 
-export default function CompaniesYieldTableClient({ yields, companyId, groups = [] }: Props) {
+export default function CompaniesYieldTableClient({ yields, companyId, groups = [], sheetMap = {} }: Props) {
     const displayRows = useMemo<DisplayRow[]>(() => {
         if (companyId) {
             return yields
@@ -227,12 +235,25 @@ export default function CompaniesYieldTableClient({ yields, companyId, groups = 
                                         ) : item.type === "summary" ? (
                                             <span>{item.row.companyName}</span>
                                         ) : (
-                                            <Link
-                                                href={`/applicants?companyId=${item.row.companyId}`}
-                                                className="text-primary hover:underline"
-                                            >
-                                                {item.row.companyName}
-                                            </Link>
+                                            <span className="inline-flex items-center gap-1">
+                                                <Link
+                                                    href={`/applicants?companyId=${item.row.companyId}`}
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    {item.row.companyName}
+                                                </Link>
+                                                {sheetMap[item.row.companyId] && (
+                                                    <a
+                                                        href={`https://docs.google.com/spreadsheets/d/${sheetMap[item.row.companyId].spreadsheetId}/edit#gid=${sheetMap[item.row.companyId].gid}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        title={`${item.row.companyName} のスプレッドシートを開く`}
+                                                        className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors duration-150"
+                                                    >
+                                                        <ExternalLink className="w-3.5 h-3.5" />
+                                                    </a>
+                                                )}
+                                            </span>
                                         )}
                                     </td>
                                     {COLUMNS.map((column) => (

@@ -7,6 +7,11 @@ description: Use this skill to record working decisions during active tasks in d
 
 作業中の設計判断を `docs/for-codex/decision-log.md` に記録する。
 
+## 必須前提
+
+- `docs/for-codex/engineering-rules.md` を確認し、機能境界・契約依存・データ所有を明文化する
+- コード変更がある判断を記録した場合は、同時に `docs/reports/{task_id}.md` へ追記する
+
 ## いつ使うか
 
 - ブラウジング結果から候補を比較したとき
@@ -28,3 +33,9 @@ description: Use this skill to record working decisions during active tasks in d
 - `impact`
 - `owner`
 - `date`
+
+加えて、マイクロサービス設計で重要な判断は `rationale` に以下を含める：
+
+- どのサービス境界を採用したか
+- どの契約（API/イベント）で連携するか
+- 依存を増やさないために何を禁止したか

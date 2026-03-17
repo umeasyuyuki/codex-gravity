@@ -14,6 +14,7 @@ Codex が探索ではなく判断に集中できる状態を作る。
 
 - 要件整理メモ
 - 要件深掘り質問と回答（日本語優先、必要なら英語補助）
+- `docs/for-codex/engineering-rules.md`
 - `docs/research/{topic}.md`
 - ブラウジング Artifact（録画/スクリーンショット/メモ）
 - 実装差分・テスト結果（Gate 2 の場合）
@@ -52,6 +53,7 @@ Codex が探索ではなく判断に集中できる状態を作る。
 - `source_commit` が現在のコミットと整合する（差異があれば理由を明記）
 - `known_gaps` が空なら `none` を明記
 - `report_path` が実在し、同一ファイル追記になっている
+- `validate_report.sh` の検証が成功する
 - `requirements_questions_asked` が 3 以上
 - `requirements_confirmed` が `yes`
 - `conversation_language`, `ui_language`, `readme_language` が日本語優先設定（例: `ja-priority`, `ja+en`）になっている
@@ -73,4 +75,10 @@ Gate 2（実装レビュー）の例：
 ```bash
 CODEX_MODE=implementation-review \
 bash .agent/skills/codex-system/scripts/review.sh
+```
+
+事前にレポート検証を必ず実行：
+
+```bash
+bash .agent/skills/codex-system/scripts/validate_report.sh docs/reports/{task_id}.md
 ```
