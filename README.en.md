@@ -1,512 +1,99 @@
-# 🎼 Antigravity Orchestra
+# RPO 24CS - Recruitment Process Management System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-macOS%20(Apple%20Silicon)-blue.svg)](#prerequisites)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Sora-bluesky/antigravity-orchestra/issues)
 
-**🌐 Language: [日本語](README.md) | English**
+**Language: [日本語](README.md) | English**
 
 ---
 
-**Antigravity Orchestra** is a multi-agent development template that orchestrates [Google Antigravity](https://antigravity.google) (Gemini 3 Pro) and [OpenAI Codex CLI](https://github.com/openai/codex) for AI-powered development workflows.
+## Overview
 
-Inspired by [Claude Code Orchestra](https://github.com/DeL-TaiseiOzaki/claude-code-orchestra) by @mkj (Matsuo Institute).
+**RPO 24CS** is a web application for recruitment agencies to manage the entire recruitment process outsourcing (RPO) workflow.
+
+It provides unified management of applicant tracking, call log recording & analysis, company-level yield analytics, and Google Sheets integration.
 
 ---
 
-## ✨ What is This?
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Applicant Management** | Register, search, and track applicants through the full funnel (40+ status flags from screening to onboarding) |
+| **Call Logs** | Record call history, analyze connection rates with day-of-week x time-slot heatmaps |
+| **Company Yield Analytics** | Real-time calculation of contact, interview, offer, and joining rates per company |
+| **Monthly Reports** | Cross-company monthly recruitment performance aggregation |
+| **Google Sheets Integration** | Bidirectional sync with client-facing spreadsheets |
+| **External Data Intake** | Automated applicant data import via Indeed / GAS (API) |
+| **CSV Export** | Export yield data and monthly totals as CSV |
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 16 (App Router) / React 19 / TypeScript 5 |
+| Database | Cloudflare D1 (SQLite) / Drizzle ORM |
+| Auth | NextAuth.js 5 (Google OAuth / JWT) |
+| UI | Tailwind CSS 4 / shadcn/ui (Radix UI) |
+| Deployment | Cloudflare Workers (OpenNextJS) |
+| Data Sync | Google Apps Script / Google Sheets API |
+| Testing | Vitest |
+
+---
+
+## Directory Structure
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        User                                 │
-│                          │                                  │
-│                          ▼                                  │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │    Google Antigravity (Orchestrator + Researcher)     │  │
-│  │    → Gemini 3 Pro / large context window              │  │
-│  │    → User interaction, research, implementation       │  │
-│  │                                                       │  │
-│  │        ┌─────────────────────────────────────────┐    │  │
-│  │        │   Codex CLI (via Skills scripts/)       │    │  │
-│  │        │   → Design, Debug, Review               │    │  │
-│  │        └─────────────────────────────────────────┘    │  │
-│  └───────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+RPO_24CS/
+├── rpo-app/                 # Main web application (Next.js)
+│   ├── src/
+│   │   ├── app/             # Pages & API routes
+│   │   ├── components/      # UI components
+│   │   ├── db/              # DB schema & client
+│   │   ├── lib/             # Business logic & utilities
+│   │   └── types/           # Type definitions
+│   ├── drizzle/             # DB migrations
+│   └── scripts/             # Data import scripts
+│
+├── gas/                     # Google Apps Script files
+├── data/                    # Data files (sample CSVs)
+├── docs/                    # Documentation
+└── logs/                    # Logs (gitignored)
 ```
 
-**Single interface - Antigravity only.** Users interact only with Antigravity, which delegates to Codex when needed.
-
 ---
 
-## 🗣️ Language Policy
+## Setup
 
-- UI copy defaults to Japanese, with English support when needed
-- `README.md` is the source-of-truth document, and `README.en.md` is a flexible derivative
-- `/startproject` and `/plan` requirement deep-dive conversations are Japanese-first (English assist allowed)
+### Prerequisites
 
----
+- Node.js 20+
+- npm
+- Cloudflare account (D1 database)
+- Google Cloud Console (OAuth configuration)
 
-## 🎯 Who is This For?
-
-- Using Antigravity but want better design and review quality
-- Finding it tedious to switch between multiple AIs
-- Want code checked from both Google and OpenAI perspectives
-
----
-
-## 🎭 Role Distribution
-
-| Role | Agent | Tasks |
-|------|-------|-------|
-| **Orchestrator** | Antigravity | User interaction, task management, workflow control |
-| **Researcher** | Antigravity | Library research, documentation search (large context window) |
-| **Builder** | Antigravity | Code implementation based on Codex's design |
-| **Designer** | Codex CLI | Architecture design, implementation planning, trade-off analysis |
-| **Debugger** | Codex CLI | Root cause analysis, complex bug investigation |
-| **Auditor** | Codex CLI | Code review, quality checks, TDD design |
-
----
-
-## 📋 Prerequisites
-
-| Requirement | How to Check | Notes |
-|-------------|--------------|-------|
-| Google Antigravity | Can launch Antigravity | [Official Site](https://antigravity.google) |
-| macOS (Apple Silicon) | `uname -m` returns `arm64` | Recommended: macOS 14+ |
-| Homebrew | `brew --version` | [brew.sh](https://brew.sh) |
-| Node.js | `which node` returns `/opt/homebrew/bin/node` | [nodejs.org](https://nodejs.org) |
-| Codex CLI | `which codex` returns `/opt/homebrew/bin/codex` | `npm i -g @openai/codex` |
-| ChatGPT Plus/Pro | OpenAI subscription | $20/month~ (OAuth sign-in) |
-
----
-
-## 🚀 Quick Start
-
-For a beginner-friendly full walkthrough, see `docs/MACOS_SETUP_COMPLETE.md`.
-
-### Step 1: Clone the Template
-
-Open a macOS terminal (zsh):
+### Local Development
 
 ```bash
-# Navigate to your projects folder
-cd /Users/asyuyukiume/Projects
-
-# Clone the template
-git clone https://github.com/Sora-bluesky/antigravity-orchestra.git my-project
-
-# Move into the project
-cd my-project
+cd rpo-app
+npm install
+cp .dev.vars.example .dev.vars    # Configure environment variables
+cp .env.example .env.local        # Configure auth credentials
+npm run dev
 ```
 
-### Step 2: Verify Runtime
-
-Check your Node.js and Codex paths:
+### Deployment
 
 ```bash
-which node    # /opt/homebrew/bin/node
-which codex   # /opt/homebrew/bin/codex
-```
-
-`codex-system` scripts are preconfigured for this environment.
-If needed, override via environment variables:
-
-```bash
-NODE_PATH="$(which node)" \
-CODEX_PATH="$(which codex)" \
-bash .agent/skills/codex-system/scripts/ask_codex.sh --mode analyze --question "Environment check"
-```
-
-No file edits are required in typical usage.
-
-### Step 3: Open in Antigravity
-
-1. Launch **Antigravity**
-2. Click **File → Open Folder** (or `Cmd+K`, `Cmd+O`)
-3. Navigate to: `/Users/asyuyukiume/Projects/my-project`
-4. Click **Select Folder**
-
-### Step 4: Try It!
-
-In Antigravity's chat, type:
-
-```
-/startproject Hello World
-```
-
-Antigravity will automatically:
-
-1. Analyze your project structure
-2. Run Japanese-first deep-dive requirement questions (min 3, ask 4+ when needed) and get explicit sign-off
-3. Build `docs/for-codex/` context bundle
-4. Run Codex Gate 1 for plan review
-5. Create and execute tasks
-6. Run Codex Gate 2 after implementation
-
----
-
-## 📁 Directory Structure
-
-```
-my-project/
-├── .agent/
-│   ├── workflows/        # 8 workflows
-│   │   ├── startproject.md   # Main workflow (8 phases)
-│   │   ├── plan.md           # Implementation planning
-│   │   ├── tdd.md            # Test-driven development
-│   │   ├── simplify.md       # Refactoring
-│   │   ├── checkpoint.md     # Session persistence
-│   │   ├── prepare-codex-context.md # Build Codex context bundle
-│   │   ├── update-learning-report.md # Append learner report
-│   │   └── init.md           # Project initialization
-│   │
-│   ├── skills/           # 5 skills
-│   │   ├── codex-system/     # Codex CLI integration
-│   │   │   ├── SKILL.md
-│   │   │   └── scripts/
-│   │   │       ├── ask_codex.sh
-│   │   │       └── review.sh
-│   │   ├── design-tracker/
-│   │   ├── research/
-│   │   ├── update-design/
-│   │   └── update-lib-docs/
-│   │
-│   └── rules/            # 9 rules
-│       ├── delegation-triggers.md  # Auto-routing (Hooks alternative)
-│       ├── role-boundaries.md      # Role separation
-│       ├── language.md
-│       ├── persona-style.md        # Endo Tasukushin tone control
-│       ├── codex-delegation.md
-│       ├── coding-principles.md
-│       ├── dev-environment.md
-│       ├── security.md
-│       └── testing.md
-│
-├── .codex/               # Codex CLI configuration
-│   └── AGENTS.md
-│
-├── docs/                 # Knowledge base
-│   ├── DESIGN.md             # Design decisions
-│   ├── for-codex/            # Structured context passed to Codex
-│   ├── reports/              # Learner-friendly progress reports
-│   ├── checkpoints/          # Session resume checkpoints
-│   ├── research/             # Research results
-│   └── libraries/            # Library constraints
-│
-└── logs/
-    └── codex-responses/      # Codex consultation logs
+cd rpo-app
+npx wrangler d1 migrations apply rpo-db
+npm run build
+npx opennextjs-cloudflare deploy
 ```
 
 ---
 
-## 📖 Workflows in Detail
+## License
 
-### /startproject - Main Workflow (8 Phases)
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Phase 0: Antigravity (Requirements Deep Dive / JA)             │
-│  → Ask Japanese-first deep-dive requirement questions (min 3)   │
-│  → Proactively ask 4+ when ambiguity or risk remains            │
-│  → Present requirement summary and get explicit user sign-off   │
-├─────────────────────────────────────────────────────────────────┤
-│  Phase 1: Antigravity (Research)                                │
-│  → Repository analysis, library research                        │
-│  → Output: docs/research/{feature}.md                           │
-├─────────────────────────────────────────────────────────────────┤
-│  Phase 2: Antigravity (Requirements Draft Plan)                 │
-│  → Convert approved requirements into a draft implementation plan│
-├─────────────────────────────────────────────────────────────────┤
-│  Phase 3: Antigravity (Prepare Codex Context)                   │
-│  → Build structured context under docs/for-codex/               │
-├─────────────────────────────────────────────────────────────────┤
-│  Phase 4: Codex CLI (Gate 1: Plan Review)                       │
-│  → Plan assessment, risk analysis, task decomposition            │
-├─────────────────────────────────────────────────────────────────┤
-│  Phase 5: Antigravity (Task Creation / Implementation)          │
-│  → Integrate all inputs                                         │
-│  → Finalize tasks and implement                                 │
-├─────────────────────────────────────────────────────────────────┤
-│  Phase 6: Antigravity (Update docs/for-codex)                   │
-│  → Refresh implementation/test context and decisions             │
-├─────────────────────────────────────────────────────────────────┤
-│  Phase 7: Codex CLI (Gate 2: Implementation Review)             │
-│  → Post-implementation review and test strategy audit            │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### /plan - Implementation Planning
-
-Create a detailed implementation plan with Codex's help.
-
-```
-/plan Add user authentication
-```
-
-### /tdd - Test-Driven Development
-
-Codex designs test cases, Antigravity implements Red-Green-Refactor cycle.
-
-```
-/tdd Login functionality
-```
-
-### /simplify - Refactoring
-
-Simplify and improve code readability.
-
-```
-/simplify src/auth/login.py
-```
-
-### /checkpoint - Session Persistence
-
-Save session state for later continuation.
-
-```
-/checkpoint          # Basic: history log
-/checkpoint --full   # Full: includes git history and file changes
-```
-
-### /prepare-codex-context - Build Codex Context Bundle
-
-Normalize Antigravity artifacts into `docs/for-codex/` before Gate 1 / Gate 2.
-
-```
-/prepare-codex-context
-```
-
-### /update-learning-report - Append Learner Report
-
-Append progress and decision rationale to the same file: `docs/reports/{task_id}.md`.
-
-```
-/update-learning-report
-```
-
----
-
-## 🛠️ Skills in Detail
-
-### codex-system - Codex CLI Integration
-
-The core skill for delegating design, debugging, and review to Codex.
-
-**Trigger Keywords:**
-
-| Category | Keywords |
-|----------|----------|
-| Design | "design", "architecture", "how to build", "which approach", "trade-off" |
-| Debug | "why doesn't work", "error", "bug", "debug" |
-| Review | "review", "check", "verify" |
-
-**When NOT to use:**
-- Simple file editing
-- Research/investigation (Antigravity handles this)
-- User conversation
-
-### Other Skills
-
-| Skill | Purpose |
-|-------|---------|
-| design-tracker | Record working decisions in docs/for-codex/decision-log.md |
-| research | Library research and documentation |
-| update-design | Promote approved decisions to docs/DESIGN.md |
-| update-lib-docs | Document library constraints |
-
----
-
-## 📏 Rules in Detail
-
-### delegation-triggers.md (Most Important)
-
-Replaces Claude Code Orchestra's 6 Hooks with Rules-based routing.
-
-**Decision Flow (intent-first with keyword signals):**
-
-```
-Receive user input
-    │
-    ▼
-[Check 1] Design decision / plan decomposition needed?
-    → Yes: /prepare-codex-context → Gate 1 (plan-review)
-    │
-    ▼
-[Check 2] TDD needed?
-    → Yes: Suggest /tdd (Antigravity doesn't design tests directly)
-    │
-    ▼
-[Check 3] Debugging needed?
-    → Yes: Use codex-system in ad-hoc mode
-    │
-    ▼
-[Check 4] Implementation complete?
-    → Yes: /prepare-codex-context → Gate 2 (implementation-review)
-    │
-    ▼
-Antigravity executes directly (research, file editing, etc.)
-```
-
-### role-boundaries.md (Role Separation)
-
-| Antigravity Does | Codex Does |
-|------------------|------------|
-| User interaction | Test design (TDD) |
-| Library research | Architecture design |
-| File editing | Trade-off analysis |
-| Code implementation | Root cause analysis |
-| | Code review |
-
-**Quick Rule: "Does this need a design decision?" → Delegate to Codex**
-
-### Other Rules
-
-| Rule | Content |
-|------|---------|
-| language.md | Think in English; keep UI/README/conversations Japanese-first with optional English support |
-| persona-style.md | Keep bright style while preserving technical rigor |
-| codex-delegation.md | Detailed Codex delegation rules |
-| coding-principles.md | Simplicity, single responsibility, early return |
-| dev-environment.md | Development environment (uv, ruff, pytest, etc.) |
-| security.md | Secret management, input validation |
-| testing.md | TDD, AAA pattern, coverage goals |
-
----
-
-## 💬 Basic Usage Examples
-
-### Example 1: New Feature Development
-
-```
-/startproject User authentication
-```
-
-Antigravity automatically runs 8 phases.
-
-### Example 2: Design Consultation
-
-```
-How should I design this feature?
-```
-
-Antigravity detects "design" keyword and delegates to Codex.
-
-### Example 3: Debugging
-
-```
-I don't understand why this error occurs
-```
-
-Antigravity delegates root cause analysis to Codex.
-
-### Example 4: Test-Driven Development
-
-```
-/tdd Login functionality
-```
-
-Codex designs test cases, Antigravity implements.
-
----
-
-## ❓ FAQ
-
-<details>
-<summary><strong>Q: Can I use this without Codex CLI?</strong></summary>
-
-Yes, but you'll lose the design review and debugging capabilities. Antigravity will handle everything directly, which may reduce code quality for complex projects.
-
-</details>
-
-<details>
-<summary><strong>Q: Why is Codex called via shell scripts?</strong></summary>
-
-On macOS, Antigravity and Codex CLI run in the same environment, so direct `bash` scripts are the simplest and most stable integration.
-
-</details>
-
-<details>
-<summary><strong>Q: How do I update the paths if I reinstall Node.js?</strong></summary>
-
-1. Run `which node` and `which codex`
-2. If required, override `NODE_PATH` and `CODEX_PATH` as environment variables
-3. Re-run `ask_codex.sh` and `review.sh`
-
-</details>
-
-<details>
-<summary><strong>Q: Can I customize the workflows?</strong></summary>
-
-Yes! Edit the files in `.agent/workflows/`. Each workflow is a Markdown file with frontmatter (name, description) and step-by-step instructions.
-
-</details>
-
-<details>
-<summary><strong>Q: Do I need ChatGPT Plus or Pro?</strong></summary>
-
-Plus ($20/month) is sufficient. Consider Pro ($200/month) if you need higher usage limits.
-
-</details>
-
----
-
-## 🔧 Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Codex skill not triggered | Explicitly say "Ask Codex about this" or use keywords (design, debug, review) |
-| Path not found error | Re-check `which node` and `which codex`, then set `NODE_PATH` / `CODEX_PATH` |
-| `permission denied` | Run `chmod +x .agent/skills/codex-system/scripts/*.sh` |
-| Role boundary violated | Explicitly say "Delegate TDD to Codex" |
-
----
-
-## ⚠️ Important Notes
-
-- **Google Antigravity is in public preview.** Features and behavior may change.
-- **Codex CLI requires a ChatGPT subscription.** Sign in via OAuth authentication.
-- Check the [official site](https://antigravity.google) for the latest information.
-
----
-
-## 🤝 Feedback
-
-For bug reports or suggestions, please [open an issue](https://github.com/Sora-bluesky/antigravity-orchestra/issues).
-
----
-
-## 🔗 Related Links
-
-### References
-
-| Resource | Author | Content |
-|----------|--------|---------|
-| [Claude Code Orchestra](https://zenn.dev/mkj/articles/claude-code-orchestra_20260120) | @mkj (Matsuo Institute) | Multi-agent coordination concept |
-| [GitHub: claude-code-orchestra](https://github.com/DeL-TaiseiOzaki/claude-code-orchestra) | DeL-TaiseiOzaki | Implementation example |
-
-### Tools
-
-- [Google Antigravity](https://antigravity.google)
-- [OpenAI Codex CLI](https://github.com/openai/codex)
-
-### Related Articles (Japanese)
-
-- [Antigravity Guide](https://zenn.dev/sora_biz/articles/antigravity-orchestra-guide)
-- [Detailed Usage Guide (Zenn)](https://zenn.dev/sora_biz/articles/antigravity-orchestra-guide)
-- [Complete macOS Setup Guide](docs/MACOS_SETUP_COMPLETE.md)
-
----
-
-## 📜 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-## 🙏 Acknowledgments
-
-This project is inspired by **Claude Code Orchestra** by [@mkj](https://zenn.dev/mkj) (Matsuo Institute). The original architecture and concept of multi-agent coordination were adapted for Google Antigravity users.
-
----
-
-📅 **Last Updated**: February 2, 2026
+MIT License - See [LICENSE](LICENSE) for details.

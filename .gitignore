@@ -2,11 +2,20 @@
 .env
 .env.local
 .env.*.local
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
-# APIキー・シークレット
+# APIキー・シークレット・サービスアカウント
 *.pem
 *.key
 secrets.json
+*-d3f239da267f.json
+rposystem-*.json
+
+# エージェント設定（共有不要）
+.agent/
+.codex/
 
 # Codex 相談ログ（プライベートな内容を含む可能性）
 logs/codex-responses/*
@@ -55,4 +64,22 @@ coverage.xml
 *.dll
 *.so
 *.dylib
-*.png
+
+# Next.js
+.next/
+out/
+
+# OpenNext / Cloudflare
+.open-next/
+.wrangler/
+.vercel/
+
+# Playwright MCP
+.playwright-mcp/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# ログ
+import-errors.log
