@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useTransition } from "react"
+import { useFormStatus } from "react-dom"
 import { useRouter } from "next/navigation"
 import { updateApplicant, addCallLog, deleteCallLog, deleteApplicant, updateCallLogCalledAt } from "@/lib/actions/applicant"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -91,6 +92,15 @@ const boolValue = (value: boolean | null | undefined) => value === true
 type UpdatableValue = boolean | Date | string | null
 type ApplicantUpdatableField = ApplicantBooleanField | ApplicantDateField | ApplicantTextField
 type ApplicantUpdatablePatch = Partial<Record<ApplicantUpdatableField, UpdatableValue>>
+
+function BasicInfoSubmitButton() {
+    const { pending } = useFormStatus()
+    return (
+        <Button type="submit" size="sm" disabled={pending}>
+            {pending ? "保存中..." : "基本情報を保存"}
+        </Button>
+    )
+}
 
 const AUTO_SAVE_DELAY_MS = 260
 const PHONE_ALLOWED_PATTERN = /^[0-9-]+$/
@@ -407,7 +417,7 @@ export default function ApplicantDetailClient({ initialData, sheetUrl }: Applica
         setBirthDateInput(toBirthDateInputValue(initialData.birthDate))
     }, [initialData.birthDate])
 
-    const handleSaveBasicInfo = (formData: FormData) => {
+    const handleSaveBasicInfo = async (formData: FormData) => {
         const name = toOptionalTextValue(formData.get("name")) || ""
         const appliedAt = parseDateInput(formData.get("appliedAt"))
         const parsedBirthDate = birthDateInput ? parseBirthDateInput(birthDateInput) : null
@@ -447,15 +457,13 @@ export default function ApplicantDetailClient({ initialData, sheetUrl }: Applica
             return
         }
 
-        startTransition(async () => {
-            try {
-                await updateApplicant(initialData.id, { ...payload, appliedAt })
-                router.refresh()
-            } catch (error) {
-                console.error(error)
-                alert("基本情報の更新に失敗しました。")
-            }
-        })
+        try {
+            await updateApplicant(initialData.id, { ...payload, appliedAt })
+            router.refresh()
+        } catch (error) {
+            console.error(error)
+            alert("基本情報の更新に失敗しました。")
+        }
     }
 
     const handleToggle = (field: ApplicantBooleanField, checked: boolean) => {
@@ -709,9 +717,7 @@ export default function ApplicantDetailClient({ initialData, sheetUrl }: Applica
                                 </select>
                             </div>
                             <div className="md:col-span-2 pt-2">
-                                <Button type="submit" size="sm" disabled={isPending}>
-                                    基本情報を保存
-                                </Button>
+                                <BasicInfoSubmitButton />
                             </div>
                         </form>
                     </CardContent>
